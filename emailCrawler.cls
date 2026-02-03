@@ -92,7 +92,7 @@ Public Sub RetrieveUnreadInvoices_Backwards_SavePDFs()
     targetInboxName = ws.Range("D12").Value
     Set targetInbox = GetInboxByStoreName(outlookApp, targetInboxName)
     If targetInbox Is Nothing Then
-        MsgBox "Inbox for 'Wesco Group, LLC - Tax' not found. Check the store name.", vbCritical
+        MsgBox "Inbox not found. Check the store name.", vbCritical
         GoTo WrapUp
     End If
     Set inbox = targetInbox
@@ -249,6 +249,7 @@ Sub ListOutlookAccountsAndStores()
     Next st
     MsgBox "All Email accounts listed", vbInformation
 End Sub
+
 
 
 
