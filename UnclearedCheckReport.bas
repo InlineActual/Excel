@@ -84,7 +84,7 @@ Sub UnclearedCheckReport()
         .Apply
     End With
     
-    ' --- Place a sum formula in a safe, dynamic row if you need a summary row ---
+    ' --- sum formula in a safe, dynamic row ---
     sumFormula = lastRow - 2
     If bottomRow < ws.Rows.Count Then
         ws.Range("D" & sumFormula).Formula = "=SUM(D" & sumFormula & ":D" & bottomRow & ")"
@@ -403,6 +403,7 @@ Function FirstBlockEnd(ws As Worksheet, colLetter As String, startRow As Long) A
         FirstBlockEnd = startRow - 1 ' no block found
     End If
 End Function
+
 
 
 
