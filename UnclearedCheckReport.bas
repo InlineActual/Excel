@@ -39,6 +39,12 @@ Sub UnclearedCheckReport()
 
     ' --- Create a small buffer row with "blankzzz" to ensure sorts/formatting have a bottom anchor ---
     ws.Range("A" & bottomRow & ":H" & bottomRow).Value = "blankzzz"
+    
+    For i = 3 To lastRow
+        If IsEmpty(ws.Range("E" & i).Value) Then
+            ws.Range("E" & i).Value = 0
+        End If
+    Next i
 
     ' --- Apply UniqueValues conditional formatting to columns B and F ---
     With ws.Range("B:B,F:F")
@@ -84,11 +90,11 @@ Sub UnclearedCheckReport()
         .Apply
     End With
     
-    ' --- sum formula in a safe, dynamic row ---
+    ' --- Place a sum formula in a safe, dynamic row if you need a summary row ---
     sumFormula = lastRow - 2
     If bottomRow < ws.Rows.Count Then
-        ws.Range("D" & sumFormula).Formula = "=SUM(D" & sumFormula & ":D" & bottomRow & ")"
-        ws.Range("E" & sumFormula).Formula = "=SUM(E" & sumFormula & ":E" & bottomRow & ")"
+        ws.Range("D" & sumFormula).Formula = "=SUM(D" & sumFormula + 1 & ":D" & bottomRow & ")"
+        ws.Range("E" & sumFormula).Formula = "=SUM(E" & sumFormula + 1 & ":E" & bottomRow & ")"
     End If
     
     ' --- Sort A:D by values in column B ---
@@ -180,18 +186,30 @@ Sub UnclearedCheckReport()
     startRow = ws.Cells(ws.Rows.Count, "E").End(xlUp).Row
     ws.Range("I" & startRow & ":I" & lastRow).ClearContents
     
+    
+    
     ' --- Replace "blankzzz" with empty string across the sheet ---
     ws.Cells.Replace What:="blankzzz", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
     
-    startingRight = FirstBlockEnd(ws, "E", 3)
-    startingLeft = FirstBlockEnd(ws, "D", 3)
+    If Not IsEmpty(ws.Range("E3")) Then
+        startingRight = FirstBlockEnd(ws, "E", 3)
+    Else
+        startingRight = 3
+    End If
+    
+    If Not IsEmpty(ws.Range("D3")) Then
+        startingLeft = FirstBlockEnd(ws, "D", 3)
+    Else
+        startingLeft = 3
+    End If
 
     If startingRight > startingLeft Then
         startRow = startingRight + 10
     Else
         startRow = startingLeft + 10
     End If
+
 
     ' --- Sort A:D by values in column B (numeric/text as numbers) for the data block ---
     With ws.Sort
@@ -220,6 +238,7 @@ Sub UnclearedCheckReport()
     End With
     
     
+    
     bottomRight = FirstBlockEnd(ws, "E", startRow)
     bottomLeft = FirstBlockEnd(ws, "D", startRow)
     If bottomRight > bottomLeft Then
@@ -227,10 +246,6 @@ Sub UnclearedCheckReport()
     Else
         lastRow = bottomLeft
     End If
-    
-    ws.Range("I" & lastRow).Value = "End sort"
-    
-    
 
     leftCount = 0
     rightCount = 0
@@ -265,9 +280,9 @@ Sub UnclearedCheckReport()
                     ws.Range("A" & i & ":D" & i).ClearContents
                     With ws.Sort
                         .SortFields.Clear
-                        .SortFields.Add2 Key:=ws.Range("E" & i & ":E" & sumFormula - 1), _
+                        .SortFields.Add2 Key:=ws.Range("D" & i & ":D" & sumFormula - 1), _
                             SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
-                        .SetRange ws.Range("E" & i & ":H" & sumFormula - 1)
+                        .SetRange ws.Range("A" & i & ":D" & sumFormula - 1)
                         .Header = xlNo
                         .MatchCase = False
                         .Orientation = xlTopToBottom
@@ -290,24 +305,42 @@ Sub UnclearedCheckReport()
     ws.Range("A" & startRow & ":I" & bottomRight).ClearContents
     ws.Cells.FormatConditions.Delete
     
-    startingRight = FirstBlockEnd(ws, "E", 3) + 1
-    startingLeft = FirstBlockEnd(ws, "D", 3) + 1
+    If Not IsEmpty(ws.Range("F3")) Then
+        startingRight = FirstBlockEnd(ws, "F", 3)
+    Else
+        startingRight = 3
+    End If
+    
+    If Not IsEmpty(ws.Range("D3")) Then
+        startingLeft = FirstBlockEnd(ws, "D", 3)
+    Else
+        startingLeft = 2
+    End If
+    
     rightCount = FirstBlockEnd(ws, "W", 1)
     leftCount = FirstBlockEnd(ws, "S", 1)
     
-    
     'insert data from S:V and W:Z back into their original columns and cleanup
     If rightCount > 0 Then
-        ws.Range("E" & startingRight & ":H" & startingRight + rightCount - 1).Value = ws.Range("W1:Z" & rightCount).Value
+        ws.Range("E" & startingRight + 1 & ":H" & startingRight + rightCount).Value = ws.Range("W1:Z" & rightCount).Value
         ws.Range("W1:Z" & rightCount).ClearContents
     End If
     If leftCount > 0 Then
-        ws.Range("A" & startingLeft & ":D" & startingLeft + leftCount - 1).Value = ws.Range("S1:V" & leftCount).Value
+        ws.Range("A" & startingLeft + 1 & ":D" & startingLeft + leftCount).Value = ws.Range("S1:V" & leftCount).Value
         ws.Range("S1:V" & leftCount).ClearContents
     End If
     
-    startingRight = FirstBlockEnd(ws, "E", 3)
-    startingLeft = FirstBlockEnd(ws, "D", 3)
+    If Not IsEmpty(ws.Range("F3")) Then
+        startingRight = FirstBlockEnd(ws, "F", 3)
+    Else
+        startingRight = 3
+    End If
+    
+    If Not IsEmpty(ws.Range("D3")) Then
+        startingLeft = FirstBlockEnd(ws, "D", 3)
+    Else
+        startingLeft = 3
+    End If
     If startingRight > startingLeft Then
         startRow = startingRight + 10
     Else
@@ -403,8 +436,6 @@ Function FirstBlockEnd(ws As Worksheet, colLetter As String, startRow As Long) A
         FirstBlockEnd = startRow - 1 ' no block found
     End If
 End Function
-
-
 
 
 
